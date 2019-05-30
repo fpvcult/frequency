@@ -40,14 +40,29 @@ interface IndexOf<T> {
 const indexes = Symbol("indexes");
 
 class Index<T> {
+  private names: string[] = [];
   public [indexes]: IndexOf<T> = {};
+
+  get length(): number {
+    return this.names.length;
+  }
 
   set(signature: number, name: string, item: T) {
     this[indexes][signature] = this[indexes][name] = item;
+    this.names.push(name);
   }
 
   get(key: string | number): T | undefined {
     return this[indexes][key];
+  }
+
+  /**
+   * Iterate over just the name values.
+   */
+  *[Symbol.iterator]() {
+    for (let i = 0, len = this.names.length; i < len; i++) {
+      yield this.names[i];
+    }
   }
 }
 
@@ -84,12 +99,19 @@ export class Frequency {
   }
 
   get(name: string): Channel | undefined;
+  get(frequency: number): Channel | undefined;
   get(band: number, channel: number): Channel | undefined;
   get(arg1: string | number, arg2?: number): Channel | undefined {
     if (typeof arg1 === "string") {
       return this.channels.get(arg1);
     } else if (typeof arg1 === "number" && typeof arg2 === "number") {
       return this.channels.get((arg1 - 1) * 8 + (arg2 - 1));
+    } else if (typeof arg1 === "number") {
+      for (let key of this.channels) {
+        if (this.channels[indexes][key].frequency === arg1) {
+          return this.channels[indexes][key];
+        }
+      }
     }
     return undefined;
   }
