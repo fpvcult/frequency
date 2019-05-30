@@ -103,7 +103,7 @@ export class Frequency {
   get(band: number, channel: number): Channel | undefined;
   get(arg1: string | number, arg2?: number): Channel | undefined {
     if (typeof arg1 === "string") {
-      return this.channels.get(arg1);
+      return this.channels.get(arg1.toUpperCase());
     } else if (typeof arg1 === "number" && typeof arg2 === "number") {
       return this.channels.get((arg1 - 1) * 8 + (arg2 - 1));
     } else if (typeof arg1 === "number") {
