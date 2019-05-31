@@ -2,7 +2,7 @@
   "name": "@fpvcult/frequency",
   "description": "A library to organize 5.8GHz FPV frequencies",
   "repository": "github:fpvcult/frequency",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
   "files": [

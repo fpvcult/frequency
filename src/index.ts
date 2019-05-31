@@ -1,7 +1,7 @@
 /**
  * Author: John Hooks <bitmachina@outlook.com>
  * URL: https://github.com/fpvcult/frequeny
- * Version: 0.1.1
+ * Version: 0.2.0
  *
  * This file is part of Frequency.
  *
