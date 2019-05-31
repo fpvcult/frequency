@@ -1,7 +1,7 @@
 /**
  * Author: John Hooks <bitmachina@outlook.com>
  * URL: https://github.com/fpvcult/frequeny
- * Version: 0.1.0
+ * Version: 0.1.1
  *
  * This file is part of Frequency.
  *
@@ -37,35 +37,6 @@ interface IndexOf<T> {
   [index: number]: T;
 }
 
-const indexes = Symbol("indexes");
-
-class Index<T> {
-  private names: string[] = [];
-  public [indexes]: IndexOf<T> = {};
-
-  get length(): number {
-    return this.names.length;
-  }
-
-  set(signature: number, name: string, item: T) {
-    this[indexes][signature] = this[indexes][name] = item;
-    this.names.push(name);
-  }
-
-  get(key: string | number): T | undefined {
-    return this[indexes][key];
-  }
-
-  /**
-   * Iterate over just the name values.
-   */
-  *[Symbol.iterator]() {
-    for (let i = 0, len = this.names.length; i < len; i++) {
-      yield this.names[i];
-    }
-  }
-}
-
 export class Channel {
   constructor(
     readonly band: number,
@@ -76,43 +47,48 @@ export class Channel {
 }
 
 export class Frequency {
-  private channels = new Index<Channel>();
-
+  private byNameOrIndex: IndexOf<Channel> = {};
+  private byFrequency: IndexOf<Array<Channel>> = {};
   constructor(config: Config = "laprf") {
     if (config !== "laprf" && config !== "rx5808") {
       throw new Error("Invalid configuration input");
     }
-    const order = (config === "laprf" ? laprf : rx5808).split("");
 
-    for (let band = 0; band < order.length; band++) {
-      const frequencies = bands[order[band]];
-      for (let channel = 0; channel < frequencies.length; channel++) {
-        const current = new Channel(
-          band + 1,
-          channel + 1,
-          frequencies[channel],
-          order[band] + (channel + 1)
-        );
-        this.channels.set(band * 8 + channel, current.name, current);
+    const order = (config === "laprf" ? laprf : rx5808).split("");
+    console.log(order);
+    for (let i = 0; i < order.length; i++) {
+      const bandName = order[i];
+      const frequencies = bands[bandName];
+      console.log(order[i]);
+      for (let j = 0; j < frequencies.length; j++) {
+        const band = i + 1;
+        const channel = j + 1;
+        const index = i * 8 + j;
+        const frequency = frequencies[j];
+        const name = bandName + channel;
+        const current = new Channel(band, channel, frequency, name);
+        this.byNameOrIndex[name] = this.byNameOrIndex[index] = current;
+        this.byFrequency[frequency] = this.byFrequency[frequency] || [];
+        this.byFrequency[frequency].push(current);
       }
     }
   }
 
   get(name: string): Channel | undefined;
-  get(frequency: number): Channel | undefined;
   get(band: number, channel: number): Channel | undefined;
   get(arg1: string | number, arg2?: number): Channel | undefined {
     if (typeof arg1 === "string") {
-      return this.channels.get(arg1.toUpperCase());
+      return this.byNameOrIndex[arg1.toUpperCase()];
     } else if (typeof arg1 === "number" && typeof arg2 === "number") {
-      return this.channels.get((arg1 - 1) * 8 + (arg2 - 1));
-    } else if (typeof arg1 === "number") {
-      for (let key of this.channels) {
-        if (this.channels[indexes][key].frequency === arg1) {
-          return this.channels[indexes][key];
-        }
-      }
+      const index = (arg1 - 1) * 8 + (arg2 - 1);
+      return this.byNameOrIndex[index];
     }
     return undefined;
+  }
+
+  getByFrequency(frequency: number): Channel | Channel[] | undefined {
+    const channels = this.byFrequency[frequency];
+    if (channels !== undefined && channels.length === 1) return channels[0];
+    return channels;
   }
 }

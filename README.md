@@ -27,28 +27,28 @@ const freqs = new Frequency("rx5808");
 
 `get(name: string): Channel | undefinded`
 
-`get(frequency: number: Channel | undefined`
-
 `get(band: number, channel: number): Channel | undefined`
 
-As aruments, takes either a string representing a channel name `F7` or `e2`, a number
-representing a frequency `5800`, or lastly two numbera first for band and second
-for channel.
+As aruments, takes either a string representing a channel name `F7` or `e2`,
+or two numbers first for band and second for channel.
 
 ```javascript
 freqs.get("F2"); // => Channel { band: 1, channel: 2, frequency: 5760, name: 'F2' }
-freqs.get(5800); // => Channel { band: 1, channel: 4, frequency: 5800, name: 'F4' }
 freqs.get(2, 8); // => Channel { band: 2, channel: 8, frequency: 5917, name: 'R8' }
 ```
 
-#### `TODO:`
+### Class Method: getByFrequency
 
-- Right now providing a frequency argument will return a single channel. Even though
-  a channel or two, between bands, share the same frequency. Consider the best method
-  to return more than one channel.
+`getByFrequency(frequency: number): Channel | Channel[] | undefined`
 
-- Frequency lookup has too loop though the channels to find the right one. Should
-  probably make an index for it too.
+Takes a frequency number as an argument. There is one frequency that is shared between bands, 5880.
+So this method returns either a single channel, an array of channels or undefined.
+
+```javascript
+freqs.getByFrequency(5880); // => [ Channel { band: 1, channel: 8, frequency: 5880, name: 'F8' },
+//                                  Channel { band: 2, channel: 7, frequency: 5880, name: 'R7' } ]
+freqs.getByFrequency(5800); // => Channel { band: 1, channel: 4, frequency: 5800, name: 'F4' }
+```
 
 ### Channel Class
 
